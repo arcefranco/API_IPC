@@ -5,7 +5,7 @@ import axios from "axios";
 import path, { dirname } from "path";
 import dotenv from "dotenv";
 import { Sequelize, DataTypes, QueryTypes } from "sequelize";
-import cron from "node-cron";
+import cron from "cron";
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -125,10 +125,14 @@ const buscarIPC = async () => {
     }
   }
 };
-var valid = cron.validate("59 * * * *");
 
-let task = cron.schedule("* * * * *", async () => {
-  await buscarIPC();
+let task = cron.CronJob("0 9 * * *", async function () {
+  try {
+    await buscarIPC();
+  } catch (error) {
+    console.log(error);
+  }
+  console.log("Ejecutando tarea diaria a las 9 AM");
 });
 
 task.start();
