@@ -4,7 +4,8 @@ import { fileURLToPath } from "url";
 import axios from "axios";
 import path, { dirname } from "path";
 import dotenv from "dotenv";
-import { Sequelize, DataTypes } from "sequelize";
+import { Sequelize, DataTypes, QueryTypes } from "sequelize";
+import cron from "node-cron";
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -61,3 +62,73 @@ app.get("/ipc", async (req, res) => {
   console.log(data);
   return res.send(data["data"]);
 });
+
+/* app.get("/fecha", async (req, res) => {
+  try {
+    buscarIPC();
+    return res.send("OK");
+  } catch (error) {
+    return res.send("error: ", error);
+  }
+}); */
+
+const buscarIPC = async () => {
+  //obtengo el mes de la ultima fecha ingresada en la DB
+  let mesUltimo;
+  try {
+    const consultaMes = await sequelize.query(
+      "SELECT MONTH(MAX(fecha)) as fecha from IPCs",
+      {
+        type: Sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    // Acceder al valor del último mes
+    mesUltimo = consultaMes[0].fecha;
+    console.log("ultimo mes: ", mesUltimo);
+  } catch (error) {
+    console.error("Error al obtener la última fecha", error);
+  }
+  //obtengo el mes actual
+  const fechaActual = new Date();
+  const mesActual = fechaActual.getMonth() + 1;
+  console.log("actual mes: ", mesActual);
+  console.log("diferencia: ", mesActual - mesUltimo);
+  if (mesActual - mesUltimo === 1) {
+    return;
+  } else {
+    let response;
+    let ultimoIPC;
+    try {
+      response = await axios.get(apiGob);
+      ultimoIPC = response.data["data"][response.data["data"].length - 1];
+    } catch (error) {
+      throw error;
+    }
+    //insertarlo SOLO si la fecha es distinta a la del ultimo indice insertado
+    let ultimaFechaAPI = new Date(ultimoIPC[0]);
+    if (
+      ultimaFechaAPI
+        .toLocaleString("es-ES", { timeZone: "UTC" })
+        .split("/")[1] !== mesUltimo
+    ) {
+      try {
+        await sequelize.query("INSERT INTO IPCs (fecha, indice) VALUES (?,?)", {
+          replacements: [ultimoIPC[0], ultimoIPC[1]],
+          type: QueryTypes.INSERT,
+        });
+      } catch (error) {
+        throw error;
+      }
+    } else {
+      return;
+    }
+  }
+};
+var valid = cron.validate("59 * * * *");
+
+let task = cron.schedule("* * * * *", async () => {
+  await buscarIPC();
+});
+
+task.start();
