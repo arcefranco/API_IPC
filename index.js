@@ -30,6 +30,22 @@ const sequelize = new Sequelize(
     },
   }
 );
+
+async function probarConexion() {
+  try {
+    // Intenta autenticarte en la base de datos
+    await sequelize.authenticate();
+    console.log("Conexión a la base de datos exitosa");
+  } catch (error) {
+    console.error("Error al conectar a la base de datos:", error.message);
+  } finally {
+    // Cierra la conexión después de la prueba
+    await sequelize.close();
+  }
+}
+
+// Llama a la función para probar la conexión al inicio
+probarConexion();
 const Datos = sequelize.define(
   "IPC",
   {
