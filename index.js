@@ -126,7 +126,7 @@ const buscarIPC = async () => {
   }
 };
 
-let task = cron.CronJob("0 9 * * *", async function () {
+let task = new cron.CronJob("0 10 * * *", async function () {
   try {
     await buscarIPC();
   } catch (error) {
