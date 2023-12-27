@@ -71,7 +71,12 @@ app.get("/", (req, res) => {
 });
 
 app.get("/ipc", async (req, res) => {
-  const { data } = await axios.get(apiGob);
+  const { data } = await axios.get(apiGob, {
+    headers: {
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+    },
+  });
   console.log(data);
   return res.send(data["data"]);
 });
@@ -144,7 +149,7 @@ const buscarIPC = async () => {
   }
 };
 
-let task = new cron.CronJob("35 11 * * *", async function () {
+let task = new cron.CronJob("31 13 * * *", async function () {
   try {
     await buscarIPC();
   } catch (error) {
