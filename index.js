@@ -43,23 +43,6 @@ async function probarConexion() {
 
 // Llama a la función para probar la conexión al inicio
 probarConexion();
-const Datos = sequelize.define(
-  "IPC",
-  {
-    fecha: {
-      type: DataTypes.STRING(150),
-      primaryKey: true, // Indicar que 'fecha' es la clave primaria
-      allowNull: false,
-    },
-    indice: {
-      type: DataTypes.STRING(150),
-      allowNull: false,
-    },
-  },
-  {
-    timestamps: false, // Deshabilitar campos createdAt y updatedAt
-  }
-);
 
 app.listen(PORT, (error) => {
   if (!error) console.log("Escuchando en puerto: " + PORT);
@@ -71,14 +54,19 @@ app.get("/", (req, res) => {
 });
 
 app.get("/ipc", async (req, res) => {
-  const { data } = await axios.get(apiGob, {
-    headers: {
-      "User-Agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-    },
-  });
-  console.log(data);
-  return res.send(data["data"]);
+  try {
+    const { data } = await axios.get(apiGob, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+      },
+    });
+    console.log(data);
+    return res.send(data["data"]);
+  } catch (error) {
+    console.log(error);
+    return res.send(error);
+  }
 });
 
 /* app.get("/fecha", async (req, res) => {
