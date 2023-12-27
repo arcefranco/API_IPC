@@ -113,7 +113,12 @@ const buscarIPC = async () => {
     let response;
     let ultimoIPC;
     try {
-      response = await axios.get(apiGob);
+      response = await axios.get(apiGob, {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+        },
+      });
       ultimoIPC = response.data["data"][response.data["data"].length - 1];
     } catch (error) {
       throw error;
