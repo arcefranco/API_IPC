@@ -6,6 +6,7 @@ import path, { dirname } from "path";
 import dotenv from "dotenv";
 import { Sequelize, DataTypes, QueryTypes } from "sequelize";
 import cron from "cron";
+import fetch from "node-fetch";
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -55,14 +56,14 @@ app.get("/", (req, res) => {
 
 app.get("/ipc", async (req, res) => {
   try {
-    const { data } = await axios.get(apiGob, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-      },
-    });
-    console.log(data);
-    return res.send(data["data"]);
+    await fetch(apiGob)
+      .then((response) => response.json())
+      .then((data) => {
+        return res.send(data);
+      })
+      .catch((error) => {
+        return res.send(error);
+      });
   } catch (error) {
     console.log(error);
     return res.send(error);
@@ -143,7 +144,6 @@ let task = new cron.CronJob("31 13 * * *", async function () {
   } catch (error) {
     console.log(error);
   }
-  console.log("Ejecutando tarea diaria a las 9 AM");
 });
 
 task.start();
