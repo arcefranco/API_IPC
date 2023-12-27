@@ -38,9 +38,6 @@ async function probarConexion() {
     console.log("Conexión a la base de datos exitosa");
   } catch (error) {
     console.error("Error al conectar a la base de datos:", error.message);
-  } finally {
-    // Cierra la conexión después de la prueba
-    await sequelize.close();
   }
 }
 
@@ -142,7 +139,7 @@ const buscarIPC = async () => {
   }
 };
 
-let task = new cron.CronJob("25 11 * * *", async function () {
+let task = new cron.CronJob("35 11 * * *", async function () {
   try {
     await buscarIPC();
   } catch (error) {
