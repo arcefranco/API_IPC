@@ -16,7 +16,7 @@ app.use(cors());
 app.use(express.static(__dirname));
 const apiGob =
   "https://apis.datos.gob.ar/series/api/series/?ids=148.3_INIVELNAL_DICI_M_26&limit=5000&format=json";
-const PORT = 3000;
+const PORT = process.env.PORT;
 
 const sequelize = new Sequelize(
   "pa7_comun",
