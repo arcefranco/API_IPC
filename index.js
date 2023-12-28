@@ -7,7 +7,7 @@ import dotenv from "dotenv";
 import { Sequelize, DataTypes, QueryTypes } from "sequelize";
 import cron from "cron";
 import fetch from "node-fetch";
-import { sendEmail } from "./helpers/sendEmail.js";
+import { emailUpdateIPC, sendEmail } from "./helpers/sendEmail.js";
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -144,6 +144,7 @@ const buscarIPC = async () => {
           replacements: [ultimoIPC[0], ultimoIPC[1]],
           type: QueryTypes.INSERT,
         });
+        await emailUpdateIPC("farce@giama.com.ar");
       } catch (error) {
         throw error;
       }
@@ -152,7 +153,7 @@ const buscarIPC = async () => {
       //y hayan pasado 10 días, se envia el mail
       if (fechaActual.getDate() >= 10) {
         try {
-          await sendEmail(email);
+          await sendEmail("farce@giama.com.ar");
           return res.send("Email enviado correctamente");
         } catch (error) {
           return res.send("Error al enviar email: ", error);

@@ -16,3 +16,18 @@ export const sendEmail = async (email) => {
     return JSON.stringify(error);
   }
 };
+
+export const emailUpdateIPC = async (email) => {
+  try {
+    transporter.sendMail({
+      //Envio el mail a la casilla que encontramos segun su nombre de usuario
+      from: "info@giama.com.ar",
+      to: email,
+      subject: "Actualización de la tabla IPC",
+      template: "update",
+    });
+  } catch (error) {
+    console.log(error);
+    return JSON.stringify(error);
+  }
+};
