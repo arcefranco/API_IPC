@@ -107,13 +107,9 @@ const buscarIPC = async () => {
     let response;
     let ultimoIPC;
     try {
-      response = await axios.get(apiGob, {
-        headers: {
-          "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-        },
-      });
-      ultimoIPC = response.data["data"][response.data["data"].length - 1];
+      let json = await fetch(apiGob);
+      response = await json.json();
+      ultimoIPC = response["data"][response["data"].length - 1];
     } catch (error) {
       throw error;
     }
@@ -138,7 +134,7 @@ const buscarIPC = async () => {
   }
 };
 
-let task = new cron.CronJob("31 13 * * *", async function () {
+let task = new cron.CronJob("12 10 * * *", async function () {
   try {
     await buscarIPC();
   } catch (error) {
