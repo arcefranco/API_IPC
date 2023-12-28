@@ -80,44 +80,49 @@ app.post("/email", async (req, res) => {
     return res.send("Error al enviar email: ", error);
   }
 });
-
-/* app.get("/fecha", async (req, res) => {
+app.get("/fecha", async (req, res) => {
   try {
     buscarIPC();
     return res.send("OK");
   } catch (error) {
     return res.send("error: ", error);
   }
-}); */
+});
 
 const buscarIPC = async () => {
   //obtengo el mes de la ultima fecha ingresada en la DB
   let mesUltimo;
-  let diaUltimo = 1;
+  let anioUltimo;
   try {
-    const consultaMes = await sequelize.query(
-      "SELECT MONTH(MAX(fecha)) as fecha from IPCs",
+    const consulta = await sequelize.query(
+      "SELECT MAX(fecha) as fecha from IPCs",
       {
         type: Sequelize.QueryTypes.SELECT,
       }
     );
 
     // Acceder al valor del último mes
-    mesUltimo = consultaMes[0].fecha;
-    console.log("ultimo mes: ", mesUltimo);
+    let fechaDB = consulta[0].fecha;
+    mesUltimo = fechaDB.split("-")[1];
+    anioUltimo = fechaDB.split("-")[0];
   } catch (error) {
     console.error("Error al obtener la última fecha", error);
   }
-  //obtengo el mes actual
+  //obtengo el mes y año actual y la diferencia entre los meses segun ambos parámetros
   const fechaActual = new Date();
   const mesActual = fechaActual.getMonth() + 1;
-  const diaActual = fechaActual.getDate();
-  console.log("actual mes: ", mesActual);
-  console.log("diferencia: ", mesActual - mesUltimo);
-  if (mesActual - mesUltimo === 1) {
+  const anioActual = fechaActual.getFullYear();
+  const diferenciaMeses =
+    mesActual - mesUltimo + 12 * (anioActual - anioUltimo);
+  console.log("mesUltimo: ", mesUltimo);
+  console.log("mesActual: ", mesActual);
+  console.log("anioUltimo: ", anioUltimo);
+  console.log("anioActual: ", anioActual);
+  console.log("diferencia entre meses: ", diferenciaMeses);
+  if (diferenciaMeses === 1) {
     return;
   } else {
-    //aca ya filtramos si la diferencia es 2 o mas
+    //si la diferencia es 2 o más hay que buscar en la apiGob
     let response;
     let ultimoIPC;
     try {
@@ -145,11 +150,15 @@ const buscarIPC = async () => {
     } else {
       //en caso de que la diferencia sea mas de uno pero el ultimo indice insertado es igual al ultimo indice en la apiGob
       //y hayan pasado 10 días, se envia el mail
-      try {
-        await sendEmail(email);
-        return res.send("Email enviado correctamente");
-      } catch (error) {
-        return res.send("Error al enviar email: ", error);
+      if (fechaActual.getDate() >= 10) {
+        try {
+          await sendEmail(email);
+          return res.send("Email enviado correctamente");
+        } catch (error) {
+          return res.send("Error al enviar email: ", error);
+        }
+      } else {
+        return;
       }
     }
   }
