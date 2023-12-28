@@ -7,6 +7,7 @@ import dotenv from "dotenv";
 import { Sequelize, DataTypes, QueryTypes } from "sequelize";
 import cron from "cron";
 import fetch from "node-fetch";
+import { sendEmail } from "./helpers/sendEmail.js";
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -70,6 +71,16 @@ app.get("/ipc", async (req, res) => {
   }
 });
 
+app.post("/email", async (req, res) => {
+  const { email } = req.body;
+  try {
+    await sendEmail(email);
+    return res.send("Email enviado correctamente");
+  } catch (error) {
+    return res.send("Error al enviar email: ", error);
+  }
+});
+
 /* app.get("/fecha", async (req, res) => {
   try {
     buscarIPC();
@@ -82,6 +93,7 @@ app.get("/ipc", async (req, res) => {
 const buscarIPC = async () => {
   //obtengo el mes de la ultima fecha ingresada en la DB
   let mesUltimo;
+  let diaUltimo = 1;
   try {
     const consultaMes = await sequelize.query(
       "SELECT MONTH(MAX(fecha)) as fecha from IPCs",
@@ -99,21 +111,23 @@ const buscarIPC = async () => {
   //obtengo el mes actual
   const fechaActual = new Date();
   const mesActual = fechaActual.getMonth() + 1;
+  const diaActual = fechaActual.getDate();
   console.log("actual mes: ", mesActual);
   console.log("diferencia: ", mesActual - mesUltimo);
   if (mesActual - mesUltimo === 1) {
     return;
   } else {
+    //aca ya filtramos si la diferencia es 2 o mas
     let response;
     let ultimoIPC;
     try {
       let json = await fetch(apiGob);
       response = await json.json();
-      ultimoIPC = response["data"][response["data"].length - 1];
+      ultimoIPC = response["data"][response["data"].length - 1]; //va a buscar a al apigob el ultimo indice
     } catch (error) {
       throw error;
     }
-    //insertarlo SOLO si la fecha es distinta a la del ultimo indice insertado
+    //inserta SOLO si la fecha es distinta a la del ultimo indice insertado
     let ultimaFechaAPI = new Date(ultimoIPC[0]);
     if (
       ultimaFechaAPI
@@ -129,12 +143,19 @@ const buscarIPC = async () => {
         throw error;
       }
     } else {
-      return;
+      //en caso de que la diferencia sea mas de uno pero el ultimo indice insertado es igual al ultimo indice en la apiGob
+      //y hayan pasado 10 días, se envia el mail
+      try {
+        await sendEmail(email);
+        return res.send("Email enviado correctamente");
+      } catch (error) {
+        return res.send("Error al enviar email: ", error);
+      }
     }
   }
 };
 
-let task = new cron.CronJob("12 10 * * *", async function () {
+let task = new cron.CronJob("15 12 * * *", async function () {
   try {
     await buscarIPC();
   } catch (error) {
