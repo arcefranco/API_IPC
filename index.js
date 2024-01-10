@@ -154,18 +154,19 @@ const buscarIPC = async () => {
       if (fechaActual.getDate() >= 10) {
         try {
           await sendEmail("farce@giama.com.ar");
-          return res.send("Email enviado correctamente");
+          console.log("Email enviado correctamente");
         } catch (error) {
-          return res.send("Error al enviar email: ", error);
+          console.log("Error al enviar email: ", error);
         }
       } else {
         return;
       }
     }
   }
+  return;
 };
 
-let task = new cron.CronJob("25 9 * * *", async function () {
+let task = new cron.CronJob("35 9 * * *", async function () {
   try {
     await buscarIPC();
   } catch (error) {
