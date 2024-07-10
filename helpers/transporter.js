@@ -11,8 +11,8 @@ export const transporter = createTransport({
   port: 2525,
   secure: false,
   auth: {
-    user: "redes@giama.com.ar",
-    pass: "6DC8116240B358533E019AECB64B9AF81838",
+    user: process.env.ELASTIC_USER,
+    pass: process.env.ELASTIC_PASS,
   },
   tls: {
     secure: false,
