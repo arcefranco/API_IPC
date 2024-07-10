@@ -168,7 +168,6 @@ const buscarIPC = async () => {
 
 let task = new cron.CronJob("55 10 * * *", async function () {
   try {
-    console.log(process.env.ELASTIC_USER, process.env.ELASTIC_PASS);
     await buscarIPC();
   } catch (error) {
     console.log(error);
