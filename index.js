@@ -17,7 +17,7 @@ app.use(express.json());
 app.use(cors());
 app.use(express.static(__dirname));
 const apiGob =
-  "http://apis.datos.gob.ar/series/api/series/?ids=148.3_INIVELNAL_DICI_M_26&limit=5000&format=json";
+  "https://apis.datos.gob.ar/series/api/series?ids=145.3_INGNACNAL_DICI_M_15&format=json";
 const PORT = process.env.PORT;
 
 const sequelize = new Sequelize(
@@ -166,7 +166,7 @@ const buscarIPC = async () => {
   return;
 };
 
-let task = new cron.CronJob("55 10 * * *", async function () {
+let task = new cron.CronJob("10 17 * * *", async function () {
   try {
     await buscarIPC();
   } catch (error) {
