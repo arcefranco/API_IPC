@@ -17,7 +17,7 @@ app.use(express.json());
 app.use(cors());
 app.use(express.static(__dirname));
 const apiGob =
-  "https://apis.datos.gob.ar/series/api/series?ids=145.3_INGNACNAL_DICI_M_15&format=json";
+  "https://apis.datos.gob.ar/series/api/series/?ids=145.3_INGNACNAL_DICI_M_15&format=json&limit=500";
 const PORT = process.env.PORT;
 
 const sequelize = new Sequelize(
