@@ -37,8 +37,6 @@ async function probarConexion() {
   try {
     // Intenta autenticarte en la base de datos
     await sequelize.authenticate();
-    console.log("EMAIL_USER:", process.env.ELASTIC_USER);
-    console.log("EMAIL_PASS:", process.env.ELASTIC_PASS);
     console.log("Conexión a la base de datos exitosa");
   } catch (error) {
     console.error("Error al conectar a la base de datos:", error.message);
@@ -168,7 +166,7 @@ const buscarIPC = async () => {
   return;
 };
 
-let task = new cron.CronJob("55 11 * * *", async function () {
+let task = new cron.CronJob("15 12 * * *", async function () {
   try {
     await buscarIPC();
   } catch (error) {
