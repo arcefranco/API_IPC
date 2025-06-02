@@ -37,8 +37,8 @@ async function probarConexion() {
   try {
     // Intenta autenticarte en la base de datos
     await sequelize.authenticate();
-    console.log("EMAIL_USER:", process.env.EMAIL_USER);
-    console.log("EMAIL_PASS:", process.env.EMAIL_PASS);
+    console.log("EMAIL_USER:", process.env.ELASTIC_USER);
+    console.log("EMAIL_PASS:", process.env.ELASTIC_PASS);
     console.log("Conexión a la base de datos exitosa");
   } catch (error) {
     console.error("Error al conectar a la base de datos:", error.message);
