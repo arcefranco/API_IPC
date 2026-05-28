@@ -278,7 +278,7 @@ return hayNuevoPorcentaje;
 
 app.get("/pruebaIPC", buscarIPC2)
 
- let task = new cron.CronJob("23 14 * * *", async function () {
+ let task = new cron.CronJob("25 14 * * *", async function () {
   try {
     await buscarIPC2();
   } catch (error) {
