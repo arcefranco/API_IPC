@@ -97,37 +97,27 @@ const buscarIPC2 = async () => {
     const mes_siguiente = getFirstDayNextMonth()
     const mes_actual = getFirstDayCurrentMonth()
     try {
-      const result = await axios.get("https://api.argly.com.ar/v1/ipc")
-      console.log("ultimo porcentaje: ", result.data["data"]["indice_ipc"])
-      ultimo_porcentaje_ipc = (result.data["data"]["indice_ipc"] / 100) + 1
-    } catch (error) {
-      console.log(error)
-      return error
-    }
+      const result_1 = await axios.get("https://api.argly.com.ar/v1/ipc")
+      console.log("ultimo porcentaje: ", result_1.data["data"]["indice_ipc"])
+      ultimo_porcentaje_ipc = (result_1.data["data"]["indice_ipc"] / 100) + 1
+
      //busco el ultimo indice real
     let ultimo_indice_real /** en abril, es el de marzo */
-    try {
-      const result = await sequelize.query("SELECT indice FROM IPCs ORDER BY fecha DESC LIMIT 1", {
+    const result_2 = await sequelize.query("SELECT indice FROM IPCs ORDER BY fecha DESC LIMIT 1", {
         type: QueryTypes.SELECT
       })
-      ultimo_indice_real = Math.round(result[0]["indice"] * 10000) / 10000
-    } catch (error) {
-      console.log(error)
-      return error
-    } 
+      ultimo_indice_real = Math.round(result_2[0]["indice"] * 10000) / 10000
+
     const indice_real_actual = Math.round(ultimo_indice_real * ultimo_porcentaje_ipc * 10000) / 10000
     /**actual: sería el que obtengo en mayo porque ya tengo el porcentaje de abril. el indice es el de abril */
   
     //inserto nuevo IPC real
-     try {
+
       await sequelize.query("INSERT INTO IPCs (fecha, indice, estimado_real) VALUES (?,?,?)",{
         type: QueryTypes.INSERT,
         replacements: [mes_anterior, indice_real_actual, "R"]
       })
-    } catch (error) {
-      console.log(error)
-      return error
-    } /**inserto en ipc mensual el de abril real (que obtuve en mayo) */
+ /**inserto en ipc mensual el de abril real (que obtuve en mayo) */
   
     //el procedimiento trabaja sobre los estimados del mes actual y los actualiza (pasan a ser reales)
     let numero_mes_anterior = mes_anterior.split("-")[1] /** actualizo los de abril estando en mayo, mes anterior es abril */
@@ -143,7 +133,7 @@ const buscarIPC2 = async () => {
           ultimo_indice_real * (factor_diario ** i) 
       
       console.log(indice)
-      try {
+
          await sequelize.query(
           `
           UPDATE ipc_diario
@@ -162,10 +152,7 @@ const buscarIPC2 = async () => {
             type: QueryTypes.UPDATE,
           }
         );
-      } catch (error) {
-        console.log(error);
-        return error
-      } 
+
   
     }
 
@@ -179,7 +166,7 @@ const buscarIPC2 = async () => {
       const fecha = `${numero_año_mes_actual}-${String(numero_mes_actual).padStart(2, "0")}-${String(i).padStart(2, "0")}`;
   
       let diario = Math.round(indice_real_actual * (factor_diario_estimado_actual ** i) * 10000) / 10000
-        try {
+
       await sequelize.query(
         `
         UPDATE ipc_diario 
@@ -196,10 +183,7 @@ const buscarIPC2 = async () => {
           type: QueryTypes.UPDATE,
         }
       );
-    } catch (error) {
-      console.log(error);
-      return error
-    }
+
     } 
 
 
@@ -215,7 +199,7 @@ const buscarIPC2 = async () => {
       const fecha = `${numero_año_mes_siguiente}-${String(numero_mes_siguiente).padStart(2, "0")}-${String(i).padStart(2, "0")}`;
       console.log(diario)
     // calculo el índice para ese día
-     try {
+
       await sequelize.query(
         `
         INSERT INTO ipc_diario (indice, usuario_alta, fecha, estimado_real) VALUES (?,?,?,?)
@@ -230,13 +214,13 @@ const buscarIPC2 = async () => {
           type: QueryTypes.INSERT,
         }
       );
-    } catch (error) {
-      console.log(error);
-      return error
-    }  
+
    }
     return "OK"
-
+    } catch (error) {
+      console.log(error)
+      return error
+    }
   }
 }
 
@@ -247,25 +231,19 @@ const nuevoPorcentaje = async () => {
   let ultimo_anio_porcentaje_DB;
   console.log("entro a nuevoPorcentaje")
   try {
-    const result = await axios.get("https://api.argly.com.ar/v1/ipc")
-    console.log("ultimo porcentaje: ", result.data["data"])
-    ultimo_mes_porcentaje_API = result.data["data"]["mes"] 
-    ultimo_anio_porcentaje_API = result.data["data"]["anio"] 
-  } catch (error) {
-    console.log(error)
-    return error
-  }
+    const result_1 = await axios.get("https://api.argly.com.ar/v1/ipc")
+    console.log("ultimo porcentaje: ", result_1.data["data"])
+    ultimo_mes_porcentaje_API = result_1.data["data"]["mes"] 
+    ultimo_anio_porcentaje_API = result_1.data["data"]["anio"] 
+  
   let ultima_fecha_real
-  try {
-    const result = await sequelize.query("SELECT fecha FROM IPCs ORDER BY fecha DESC LIMIT 1", {
+
+    const result_2 = await sequelize.query("SELECT fecha FROM IPCs ORDER BY fecha DESC LIMIT 1", {
       type: QueryTypes.SELECT
     })
-    ultima_fecha_real = result[0]["fecha"]
+    ultima_fecha_real = result_2[0]["fecha"]
   
-  } catch (error) {
-    console.log(error)
-    return error
-  } 
+
   ultimo_mes_porcentaje_DB = Number(ultima_fecha_real.split("-")[1])
   ultimo_anio_porcentaje_DB  = Number(ultima_fecha_real.split("-")[0])
 
@@ -274,15 +252,19 @@ const hayNuevoPorcentaje =
   ultimo_anio_porcentaje_API !== ultimo_anio_porcentaje_DB;
 
 return hayNuevoPorcentaje; 
-
+  }catch (error) {
+    console.log(error)
+    return error
+  }
 }
 
 
 
-new cron.CronJob("05 16 * * *", async function () {
+new cron.CronJob("15 16 * * *", async function () {
   try {
     await buscarIPC2();
   } catch (error) {
+    return error
     console.log(error);
   } 
 });  
