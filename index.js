@@ -84,7 +84,7 @@ app.post("/email", async (req, res) => {
   }
 });
 
-
+app.get("/pruebaIPC", buscarIPC2)
 
 
 const buscarIPC2 = async () => {
@@ -245,6 +245,7 @@ const nuevoPorcentaje = async () => {
   let ultimo_anio_porcentaje_API;
   let ultimo_mes_porcentaje_DB;
   let ultimo_anio_porcentaje_DB;
+  console.log("entro a nuevoPorcentaje")
   try {
     const result = await axios.get("https://api.argly.com.ar/v1/ipc")
     console.log("ultimo porcentaje: ", result.data["data"])
@@ -276,7 +277,7 @@ return hayNuevoPorcentaje;
 
 }
 
-app.get("/pruebaIPC", buscarIPC2)
+
 
  let task = new cron.CronJob("28 14 * * *", async function () {
   try {
