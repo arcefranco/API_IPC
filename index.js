@@ -288,6 +288,18 @@ new cron.CronJob("05 16 * * *", async function () {
 });  
 
 
+const mostrarHoraCadaMinuto = () => {
+  // muestra inmediatamente
+  console.log("Hora actual:", new Date().toLocaleString());
+
+  // luego cada 1 minuto
+  setInterval(() => {
+    console.log("Hora actual:", new Date().toLocaleString());
+  }, 60000);
+};
+
+mostrarHoraCadaMinuto();
+
 
 
 /*  app.get("/pruebaIPC", buscarIPC2) */
