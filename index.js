@@ -88,7 +88,7 @@ app.post("/email", async (req, res) => {
 
 
 const buscarIPC2 = async () => {
-  const hayNuevoPorcentaje = nuevoPorcentaje()
+  const hayNuevoPorcentaje = await nuevoPorcentaje()
   if(hayNuevoPorcentaje){
     console.log(hayNuevoPorcentaje)
     //busco ultimo porcentaje IPC
