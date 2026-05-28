@@ -90,6 +90,7 @@ app.post("/email", async (req, res) => {
 const buscarIPC2 = async () => {
   const hayNuevoPorcentaje = nuevoPorcentaje()
   if(hayNuevoPorcentaje){
+    console.log(hayNuevoPorcentaje)
     //busco ultimo porcentaje IPC
     let ultimo_porcentaje_ipc
     const mes_anterior = getFirstDayPreviousMonth()
@@ -103,9 +104,12 @@ const buscarIPC2 = async () => {
       console.log(error)
       return error
     }
-  
+    console.log(mes_anterior)
+    console.log(mes_siguiente)
+    console.log(mes_actual)
+    return
      //busco el ultimo indice real
-    let ultimo_indice_real
+    let ultimo_indice_real /** en abril, es el de marzo */
     try {
       const result = await sequelize.query("SELECT indice FROM IPCs ORDER BY fecha DESC LIMIT 1", {
         type: QueryTypes.SELECT
@@ -116,10 +120,10 @@ const buscarIPC2 = async () => {
       return error
     } 
     const indice_real_actual = Math.round(ultimo_indice_real * ultimo_porcentaje_ipc * 10000) / 10000
-    console.log("indice real actual: ", indice_real_actual)
+    /**actual: sería el que obtengo en mayo porque ya tengo el porcentaje de abril. el indice es el de abril */
   
     //inserto nuevo IPC real
-    try {
+     try {
       sequelize.query("INSERT INTO IPCs (fecha, indice, estimado_real) VALUES (?,?,?)",{
         type: QueryTypes.INSERT,
         replacements: [mes_anterior, indice_real_actual, "R"]
@@ -127,23 +131,24 @@ const buscarIPC2 = async () => {
     } catch (error) {
       console.log(error)
       return error
-    }
+    } /**inserto en ipc mensual el de abril real (que obtuve en mayo) */
   
     //el procedimiento trabaja sobre los estimados del mes actual y los actualiza (pasan a ser reales)
-    let numero_mes_anterior = mes_anterior.split("-")[1]
+    let numero_mes_anterior = mes_anterior.split("-")[1] /** actualizo los de abril estando en mayo, mes anterior es abril */
     let numero_año_mes_anterior = mes_anterior.split("-")[0]
     let cantidad_dias_mes_anterior = getDaysInMonth(numero_mes_anterior, numero_año_mes_anterior);
     const factor_diario = Math.pow(
-    indice_real_actual / ultimo_indice_real,
-    1 / cantidad_dias_mes_anterior
+    indice_real_actual /**abril */ / ultimo_indice_real /**marzo */,
+    1 / cantidad_dias_mes_anterior /**cantidad de dias de abril */
     );
     for(let i = 1; i <= cantidad_dias_mes_anterior; i++){
       const fecha = `${numero_año_mes_anterior}-${String(numero_mes_anterior).padStart(2, "0")}-${String(i).padStart(2, "0")}`;
       const indice =
           ultimo_indice_real * (factor_diario ** i) 
-    
+      
+      console.log(indice)
       try {
-        await sequelize.query(
+         await sequelize.query(
           `
           UPDATE ipc_diario
           SET indice = :indice,
@@ -163,16 +168,16 @@ const buscarIPC2 = async () => {
         );
       } catch (error) {
         console.log(error);
-        return error;
-      }
+        return error
+      } 
   
     }
-     
-    //estimados del mes ACTUAL
-    let numero_mes_actual = mes_actual.split("-")[1]
+
+    //estimados del mes ACTUAL 
+    let numero_mes_actual = mes_actual.split("-")[1] /**actual seria mayo en el ejemplo */
     let numero_año_mes_actual = mes_actual.split("-")[0]
     let cantidad_dias_mes_actual = getDaysInMonth(numero_mes_actual, numero_año_mes_actual);
-    const indice_estimado_actual = Math.round (indice_real_actual * ultimo_porcentaje_ipc * 10000) / 10000
+    const indice_estimado_actual = Math.round (indice_real_actual /*el real de abril */ * ultimo_porcentaje_ipc  * 10000) / 10000
     const factor_diario_estimado_actual = Math.pow((indice_estimado_actual / indice_real_actual), (1/cantidad_dias_mes_actual))
      for (let i = 1; i <= cantidad_dias_mes_actual; i++) {
       const fecha = `${numero_año_mes_actual}-${String(numero_mes_actual).padStart(2, "0")}-${String(i).padStart(2, "0")}`;
@@ -197,16 +202,18 @@ const buscarIPC2 = async () => {
       );
     } catch (error) {
       console.log(error);
-      return error;
+      return error
     }
     } 
+
+
   
     //estimados mes siguiente 
-    let numero_mes_siguiente = mes_siguiente.split("-")[1]
+    let numero_mes_siguiente = mes_siguiente.split("-")[1] /**junio */
     let numero_año_mes_siguiente = mes_siguiente.split("-")[0]
     let cantidad_dias_mes_siguiente = getDaysInMonth(numero_mes_siguiente, numero_año_mes_siguiente);
    for (let i = 1; i <= cantidad_dias_mes_siguiente; i++) {
-      const indice_estimado_mes_siguiente = Math.round(indice_estimado_actual * ultimo_porcentaje_ipc * 10000) / 10000
+      const indice_estimado_mes_siguiente = Math.round(indice_estimado_actual /** el estimado de mayo */ * ultimo_porcentaje_ipc * 10000) / 10000
       const factor_diario_estimado_mes_siguiente = Math.pow((indice_estimado_mes_siguiente / indice_estimado_actual), (1/cantidad_dias_mes_siguiente))
       let diario = Math.round(indice_estimado_actual * (factor_diario_estimado_mes_siguiente ** i) * 10000) / 10000
       const fecha = `${numero_año_mes_siguiente}-${String(numero_mes_siguiente).padStart(2, "0")}-${String(i).padStart(2, "0")}`;
@@ -229,7 +236,7 @@ const buscarIPC2 = async () => {
       );
     } catch (error) {
       console.log(error);
-      return error;
+      return error
     }  
    }
     return "OK"
@@ -273,9 +280,9 @@ return hayNuevoPorcentaje;
 
 }
 
-app.get("/pruebaIPC", nuevoPorcentaje)
+app.get("/pruebaIPC", buscarIPC2)
 
- let task = new cron.CronJob("31 12 * * *", async function () {
+ let task = new cron.CronJob("22 13 * * *", async function () {
   try {
     await buscarIPC2();
   } catch (error) {
