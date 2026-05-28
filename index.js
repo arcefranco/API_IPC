@@ -279,19 +279,15 @@ return hayNuevoPorcentaje;
 
 
 
- let task = new cron.CronJob({
-  cronTime: "52 15 * * *",
-  onTick: async function () {
-    try {
-      await buscarIPC2();
-    } catch (error) {
-      console.log(error);
-    }
-  },
-  timezone: "America/Argentina/Buenos_Aires"
+new cron.CronJob("59 15 * * *", async function () {
+  try {
+    await buscarIPC2();
+  } catch (error) {
+    console.log(error);
+  } 
 });  
 
-task.start(); 
+
 
 
 /*  app.get("/pruebaIPC", buscarIPC2) */
