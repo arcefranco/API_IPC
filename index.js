@@ -260,7 +260,7 @@ return hayNuevoPorcentaje;
 
 
 
-new cron.CronJob("15 16 * * *", async function () {
+new cron.CronJob("17 16 * * *", async function () {
   console.log("entra al cron")
 
   try {
