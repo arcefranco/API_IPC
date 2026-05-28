@@ -84,7 +84,7 @@ app.post("/email", async (req, res) => {
   }
 });
 
-app.get("/pruebaIPC", buscarIPC2)
+
 
 
 const buscarIPC2 = async () => {
@@ -288,3 +288,6 @@ return hayNuevoPorcentaje;
 });  
 
  task.start(); 
+
+
+ app.get("/pruebaIPC", buscarIPC2)
