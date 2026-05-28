@@ -104,10 +104,6 @@ const buscarIPC2 = async () => {
       console.log(error)
       return error
     }
-    console.log(mes_anterior)
-    console.log(mes_siguiente)
-    console.log(mes_actual)
-    return
      //busco el ultimo indice real
     let ultimo_indice_real /** en abril, es el de marzo */
     try {
@@ -282,7 +278,7 @@ return hayNuevoPorcentaje;
 
 app.get("/pruebaIPC", buscarIPC2)
 
- let task = new cron.CronJob("10 14 * * *", async function () {
+ let task = new cron.CronJob("23 14 * * *", async function () {
   try {
     await buscarIPC2();
   } catch (error) {
