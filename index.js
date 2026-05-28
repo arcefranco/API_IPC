@@ -260,7 +260,7 @@ return hayNuevoPorcentaje;
 
 
 
-const task = new cron.CronJob("23 16 * * *", async function () {
+const task = new cron.CronJob("23 10 * * *", async function () {
   console.log("entra al cron")
 
   try {
