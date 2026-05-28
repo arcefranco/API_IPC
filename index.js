@@ -124,7 +124,7 @@ const buscarIPC2 = async () => {
   
     //inserto nuevo IPC real
      try {
-      sequelize.query("INSERT INTO IPCs (fecha, indice, estimado_real) VALUES (?,?,?)",{
+      await sequelize.query("INSERT INTO IPCs (fecha, indice, estimado_real) VALUES (?,?,?)",{
         type: QueryTypes.INSERT,
         replacements: [mes_anterior, indice_real_actual, "R"]
       })
@@ -231,7 +231,7 @@ const buscarIPC2 = async () => {
             `${fecha} 00:00:00`,
             "E"
           ],
-          type: QueryTypes.UPDATE,
+          type: QueryTypes.INSERT,
         }
       );
     } catch (error) {
@@ -282,7 +282,7 @@ return hayNuevoPorcentaje;
 
 app.get("/pruebaIPC", buscarIPC2)
 
- let task = new cron.CronJob("22 13 * * *", async function () {
+ let task = new cron.CronJob("10 14 * * *", async function () {
   try {
     await buscarIPC2();
   } catch (error) {
