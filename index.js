@@ -260,17 +260,18 @@ return hayNuevoPorcentaje;
 
 
 
-new cron.CronJob("17 16 * * *", async function () {
+const task = new cron.CronJob("23 16 * * *", async function () {
   console.log("entra al cron")
 
   try {
     await buscarIPC2();
   } catch (error) {
-    return error
     console.log(error);
+    return error
   } 
 });  
 
+task.start()
 
 const mostrarHoraCadaMinuto = () => {
   // muestra inmediatamente
