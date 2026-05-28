@@ -261,6 +261,8 @@ return hayNuevoPorcentaje;
 
 
 new cron.CronJob("15 16 * * *", async function () {
+  console.log("entra al cron")
+
   try {
     await buscarIPC2();
   } catch (error) {
